@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Website Audit Tracker · Trumark Homes</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@500;600;700&display=swap">
+<style>
+  /* Layout: brand band header, filter row, priority tiles, two chart cards, then the working fix list. Trumark teal #004F59 / orange #EA7600, Montserrat headings, Lato body (stand-in for Mr Eaves XL Modern). */
+  :root {
+    --bg: #F4F6F6; --panel: #FFFFFF; --fg: #313131; --muted: #5E6A6C; --line: #DCE2E3; --mist: #EEEFF0;
+    --teal: #004F59; --teal-ink: #004F59; --orange: #EA7600;
+    --band: #004F59; --band-ink: #FFFFFF; --band-muted: #B9D3D6;
+    --high: #B42318; --med: #C96500; --low: #4F8F98; --heads: #6E5FA6; --ok: #2F7D4F; --prog: #1C6E8C;
+    --shadow: 0 8px 24px rgba(0, 40, 45, .14);
+    --head: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+    --body: 'Lato', 'Gill Sans', 'Helvetica Neue', Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --r: 6px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101718; --panel: #172022; --fg: #E6E9EA; --muted: #9BA8AA; --line: #2B3739; --mist: #1F2A2C;
+      --teal: #5FB0B9; --teal-ink: #8CCBD2; --orange: #F59A3A;
+      --band: #0D3D44; --band-ink: #F2F5F5; --band-muted: #9CBFC3;
+      --high: #F0796F; --med: #F59A3A; --low: #6FB2BB; --heads: #A497D6; --ok: #5CB883; --prog: #6CB6D6;
+      --shadow: 0 8px 24px rgba(0, 0, 0, .45);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101718; --panel: #172022; --fg: #E6E9EA; --muted: #9BA8AA; --line: #2B3739; --mist: #1F2A2C;
+    --teal: #5FB0B9; --teal-ink: #8CCBD2; --orange: #F59A3A;
+    --band: #0D3D44; --band-ink: #F2F5F5; --band-muted: #9CBFC3;
+    --high: #F0796F; --med: #F59A3A; --low: #6FB2BB; --heads: #A497D6; --ok: #5CB883; --prog: #6CB6D6;
+    --shadow: 0 8px 24px rgba(0, 0, 0, .45);
+    color-scheme: dark;
+  }
+  body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.45; }
+  .wa { max-width: 1440px; margin: 0 auto; padding-block: 20px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
+
+  .head { background: var(--band); color: var(--band-ink); border-radius: var(--r); border-bottom: 4px solid var(--orange); padding: 22px clamp(16px, 3vw, 32px); display: grid; gap: 8px; }
+  .mark { margin: 0; font-family: var(--head); font-weight: 600; font-size: 12px; letter-spacing: .32em; text-transform: uppercase; }
+  .mark span { color: var(--orange); }
+  .eyebrow { margin: 0; color: var(--band-muted); font-family: var(--head); font-weight: 500; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+  .title { margin: 0; font-family: var(--head); font-weight: 600; font-size: clamp(24px, 3.2vw, 34px); line-height: 1.15; text-wrap: balance; }
+  .take { margin: 0; max-width: 62rem; font-size: 17px; }
+  .take b { font-family: var(--head); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .take .hi { color: var(--orange); }
+  .progress { display: grid; gap: 6px; max-width: 40rem; margin-top: 4px; }
+  .progress-track { height: 8px; border-radius: 999px; background: color-mix(in srgb, var(--band-ink) 18%, transparent); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--orange); border-radius: 999px; transition: width .4s ease-out; }
+  .progress-label { font-size: 13px; color: var(--band-muted); }
+  .progress-label b { color: var(--band-ink); font-variant-numeric: tabular-nums; }
+  .scope { margin: 0; color: var(--band-muted); font-size: 13px; }
+  .scope b { color: var(--band-ink); }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; }
+  .field { display: grid; gap: 4px; font-family: var(--head); font-weight: 500; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--teal-ink); min-width: 0; }
+  .field select, .field input { font-family: var(--body); letter-spacing: 0; text-transform: none; font-size: 15px; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 7px 10px; min-width: 12rem; max-width: 100%; }
+  .field input { min-width: 15rem; }
+  .btn { font-family: var(--head); font-weight: 600; font-size: 13px; color: var(--teal-ink); background: var(--panel); border: 1px solid var(--teal); border-radius: var(--r); padding: 7px 14px; cursor: pointer; }
+  .btn:hover { background: var(--teal); color: var(--band-ink); }
+  .btn.primary { background: var(--teal); color: var(--band-ink); }
+  .btn.primary:hover { filter: brightness(1.1); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  :is(.btn, .chip, .tile, select, input, textarea, tr):focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: 10px; }
+  .tile { --c: var(--muted); display: grid; gap: 4px; align-content: start; text-align: left; font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: var(--r); padding: 14px; cursor: pointer; }
+  .tile:hover { border-color: var(--c); }
+  .tile[aria-pressed="true"] { outline: 2px solid var(--c); outline-offset: -1px; background: color-mix(in srgb, var(--c) 7%, var(--panel)); }
+  .tile-label { font-family: var(--head); font-weight: 600; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--c); }
+  .tile-num { font-family: var(--head); font-weight: 600; font-size: 30px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .tile-sub { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tile-note { font-size: 12px; color: var(--muted); }
+  [data-prio="High"] { --c: var(--high); }
+  [data-prio="Medium"] { --c: var(--med); }
+  [data-prio="Low"] { --c: var(--low); }
+  [data-prio="Heads-Up"] { --c: var(--heads); }
+  [data-prio="No Change"] { --c: var(--ok); }
+  [data-prio="Open"] { --c: var(--teal); }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .card h2 { margin: 0; font-family: var(--head); font-weight: 600; font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--teal-ink); }
+  .note { margin: 0; color: var(--muted); font-size: 13px; max-width: 72rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-family: var(--head); font-weight: 500; font-size: 12px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend span::before { content: ""; width: 11px; height: 11px; border-radius: 2px; background: var(--c); }
+  .legend .fixed-key { --c: color-mix(in srgb, var(--ok) 45%, transparent); }
+
+  .chart { position: relative; min-height: 12rem; }
+  .chart svg { display: block; width: 100%; }
+  .chart .row { cursor: pointer; }
+  .chart .row:hover .rowbg { fill: var(--mist); }
+  .chart text { font-family: var(--body); font-size: 12px; fill: var(--fg); }
+  .chart .end { fill: var(--muted); font-variant-numeric: tabular-nums; }
+  .tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 6px 10px; font-size: 12px; white-space: nowrap; z-index: 3; }
+  .tip .h { font-family: var(--head); font-weight: 600; color: var(--muted); }
+  .tip i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .chips + .chips { margin-top: -2px; }
+  .chips-label { font-family: var(--head); font-weight: 600; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+  .chip { --c: var(--teal); font-family: var(--head); font-weight: 500; font-size: 12px; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+  .chip.plain::before { display: none; }
+  .chip[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: var(--band-ink); }
+
+  .notice { margin: 0; font-size: 13px; padding: 8px 12px; border-radius: var(--r); background: var(--mist); color: var(--fg); }
+  .tablewrap { max-height: 38rem; overflow: auto; border: 1px solid var(--line); border-radius: var(--r); }
+  table.fix { width: 100%; min-width: 66rem; border-collapse: collapse; font-size: 13px; }
+  table.fix th { position: sticky; top: 0; z-index: 1; background: var(--band); color: var(--band-ink); text-align: left; font-family: var(--head); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 11px; padding: 9px 10px; white-space: nowrap; }
+  table.fix td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.fix tbody tr { cursor: pointer; }
+  table.fix tbody tr:hover td { background: var(--mist); }
+  table.fix tbody tr[aria-selected="true"] td { background: color-mix(in srgb, var(--teal) 12%, transparent); }
+  table.fix tbody tr.done td:not(.c-done):not(.c-status) { color: var(--muted); }
+  table.fix tbody tr.done .c-fix { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); }
+  .c-done { width: 3.2rem; text-align: center; }
+  .c-done input { width: 18px; height: 18px; accent-color: var(--ok); cursor: pointer; margin: 0; }
+  .c-done input:disabled { cursor: not-allowed; }
+  .c-id { font-family: var(--mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  .c-fix { min-width: 22rem; max-width: 34rem; }
+  .pill { --c: var(--muted); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; padding: 1px 9px; border-radius: 999px; font-family: var(--head); font-weight: 600; font-size: 11px; background: color-mix(in srgb, var(--c) 15%, transparent); }
+  .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+  .st { --c: var(--muted); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-family: var(--head); font-weight: 600; font-size: 11px; padding: 1px 9px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); color: var(--c); }
+  .st[data-st="Fixed"] { --c: var(--ok); }
+  .st[data-st="In progress"] { --c: var(--prog); }
+  .st[data-st="Needs decision"] { --c: var(--heads); }
+  .who { display: block; margin-top: 3px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  .empty { color: var(--muted); padding: 16px; }
+
+  .detail { border-top: 3px solid var(--orange); padding-top: 14px; display: grid; gap: 12px; }
+  .detail-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+  .detail h3 { margin: 0; font-family: var(--head); font-weight: 600; font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--teal-ink); }
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: 18px; }
+  dl.kv { display: grid; grid-template-columns: minmax(6.5rem, max-content) 1fr; gap: 6px 14px; margin: 0; font-size: 13px; }
+  dl.kv dt { color: var(--teal-ink); font-family: var(--head); font-weight: 600; font-size: 12px; }
+  dl.kv dd { margin: 0; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  dl.kv .long { max-height: 14rem; overflow: auto; }
+  dl.kv a { color: var(--teal-ink); }
+  .update { display: grid; gap: 10px; align-content: start; background: var(--mist); border-radius: var(--r); padding: 14px; }
+  .update h4 { margin: 0; font-family: var(--head); font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--teal-ink); }
+  .update select, .update textarea { font: inherit; font-size: 14px; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 7px 10px; width: 100%; box-sizing: border-box; }
+  .update textarea { min-height: 4.5rem; resize: vertical; }
+  .update label { display: grid; gap: 4px; font-family: var(--head); font-weight: 500; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .update-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .history { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 12.5px; }
+  .history li { display: grid; gap: 1px; padding-left: 10px; border-left: 2px solid var(--line); }
+  .history .meta { color: var(--muted); }
+  @media (max-width: 34rem) { dl.kv { grid-template-columns: 1fr; } }
+
+  table.cov { width: 100%; min-width: 42rem; border-collapse: collapse; font-size: 13px; }
+  table.cov th { text-align: left; color: var(--teal-ink); font-family: var(--head); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 11px; padding: 6px 10px; border-bottom: 2px solid var(--teal); }
+  table.cov td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .scroll { overflow-x: auto; }
+  .cov-no { color: var(--med); font-weight: 700; white-space: nowrap; }
+  .cov-part { color: var(--muted); white-space: nowrap; }
+
+  .st[data-st="Still failing"] { --c: var(--orange); }
+  .due { white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .due.late { color: var(--orange); font-weight: 700; }
+  .late-tag { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; font-family: var(--head); font-weight: 600; font-size: 10.5px; color: var(--band-ink); background: var(--orange); }
+  .changes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 14px; }
+  .changes > *, .stack > * { min-width: 0; }
+  .stack { display: grid; gap: 14px; }
+  .pane { background: var(--mist); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 10px; align-content: start; }
+  .pane h3 { margin: 0; font-family: var(--head); font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--teal-ink); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 10px; }
+  .stat b { display: block; font-family: var(--head); font-weight: 600; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--teal-ink); }
+  .stat.warn b { color: var(--orange); }
+  .stat span { font-size: 12.5px; color: var(--muted); }
+  .pane ul { margin: 0; padding-left: 18px; font-size: 13px; display: grid; gap: 2px; }
+  .silent { margin: 0; font-size: 13.5px; }
+  .silent b { font-family: var(--head); color: var(--orange); }
+  .silent.none b { color: var(--ok); }
+  table.acct { width: 100%; min-width: 44rem; border-collapse: collapse; font-size: 13px; }
+  table.acct th { text-align: left; color: var(--teal-ink); font-family: var(--head); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 11px; padding: 6px 10px; border-bottom: 2px solid var(--teal); white-space: nowrap; }
+  table.acct td { padding: 6px 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  table.acct td.n, table.acct th.n { text-align: right; width: 6rem; }
+  table.acct tr { cursor: pointer; }
+  table.acct tbody tr:hover td { background: var(--mist); }
+  table.acct .none { color: var(--orange); }
+  table.acct .hot { color: var(--orange); font-weight: 700; }
+  .feed { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 8px 16px; font-size: 13px; max-height: 14rem; overflow: auto; }
+  .feed li { padding-left: 10px; border-left: 2px solid var(--line); }
+  .feed .meta { color: var(--muted); font-size: 12px; }
+  .sub-h { margin: 0 0 6px; font-family: var(--head); font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--teal-ink); }
+  .controls .spacer { flex: 1 1 auto; }
+  .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); font-size: 13px; padding: 9px 14px; border-radius: var(--r); box-shadow: var(--shadow); z-index: 20; max-width: calc(100% - 32px); }
+  .skeleton { color: transparent !important; background: var(--mist); border-radius: 4px; }
+  @media (prefers-reduced-motion: reduce) { .progress-fill { transition: none; } }
+  .signin { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; background: var(--mist); border-radius: var(--r); padding: 12px 14px; }
+  .signin .field input { min-width: 11rem; }
+  .signin-who { font-size: 13.5px; align-self: center; }
+  .signin-who b { font-family: var(--head); }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+</style>
+</head>
+<body>
+
+<div class="wa">
+  <header class="head" id="summary">
+    <p class="mark">Trumark <span>Homes</span></p>
+    <p class="eyebrow">Website audit · Run 2 · scanned <span id="run-date">—</span></p>
+    <h1 class="title">Website audit — fix tracker</h1>
+    <p class="take"><b class="hi" id="tk-high">—</b> high-priority items still need a fix (target: 2 business days). <b id="tk-open">—</b> open items remain, <b id="tk-fixed">—</b> are marked fixed, and <b id="tk-ok">—</b> checks already meet the standard.</p>
+    <div class="progress" aria-hidden="false">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-label"><b id="progress-pct">—</b> of High, Medium and Low items marked fixed for this view</div>
+    </div>
+    <p class="scope"><b id="scope-pages">—</b> pages scanned across <b id="scope-comms">—</b> communities and neighborhoods. Colorado is the only division scanned so far.</p>
+  </header>
+
+  <div class="controls" id="filters">
+    <label class="field">Division
+      <select id="f-division" aria-label="Division"></select>
+    </label>
+    <label class="field">Community
+      <select id="f-community" aria-label="Community"></select>
+    </label>
+    <label class="field">Search findings
+      <input id="f-q" type="search" placeholder="e.g. APR, alt text, Kestrel" autocomplete="off">
+    </label>
+    <button class="btn" type="button" id="f-reset">Reset filters</button>
+    <span class="spacer"></span>
+    <button class="btn primary" type="button" id="dl-deck">Download presentation (.pptx)</button>
+  </div>
+
+  <div class="tiles" id="tiles">
+    <button class="tile" type="button" data-prio="High" aria-pressed="false"><span class="tile-label">High</span><span class="tile-num" data-k="High">—</span><span class="tile-sub" data-sub="High">—</span><span class="tile-note">Trust, compliance or leads · 2 business days</span></button>
+    <button class="tile" type="button" data-prio="Medium" aria-pressed="false"><span class="tile-label">Medium</span><span class="tile-num" data-k="Medium">—</span><span class="tile-sub" data-sub="Medium">—</span><span class="tile-note">SEO, accessibility, completeness · next review</span></button>
+    <button class="tile" type="button" data-prio="Low" aria-pressed="false"><span class="tile-label">Low</span><span class="tile-num" data-k="Low">—</span><span class="tile-sub" data-sub="Low">—</span><span class="tile-note">Polish · within 30 days or batched</span></button>
+    <button class="tile" type="button" data-prio="Heads-Up" aria-pressed="false"><span class="tile-label">Heads-Up</span><span class="tile-num" data-k="Heads-Up">—</span><span class="tile-sub" data-sub="Heads-Up">—</span><span class="tile-note">Needs a decision · not counted as an issue</span></button>
+    <button class="tile" type="button" data-prio="No Change" aria-pressed="false"><span class="tile-label">No Change</span><span class="tile-num" data-k="No Change">—</span><span class="tile-sub">Checks that meet the standard</span><span class="tile-note">Nothing to fix</span></button>
+  </div>
+
+  <section class="card" id="changes">
+    <h2>What changed</h2>
+    <p class="note" id="ch-note">What the scan found compared with the last scan, and what teams have done in this tracker since. Uses the division and community filters.</p>
+    <div class="changes">
+      <div class="pane" id="ch-scan"></div>
+      <div class="pane">
+        <h3>Since the scan · tracker activity</h3>
+        <div class="stats">
+          <div class="stat"><b id="ch-updates">—</b><span>status updates</span></div>
+          <div class="stat"><b id="ch-fixed">—</b><span>marked fixed</span></div>
+          <div class="stat"><b id="ch-prog">—</b><span>in progress or needs decision</span></div>
+          <div class="stat warn"><b id="ch-overdue">—</b><span>past fix window</span></div>
+        </div>
+        <p class="silent" id="ch-silent"></p>
+      </div>
+    </div>
+    <div class="stack">
+      <div>
+        <h3 class="sub-h">Progress by community</h3>
+        <div class="scroll"><table class="acct"><thead><tr><th scope="col">Community</th><th scope="col" class="n">High</th><th scope="col" class="n">Open</th><th scope="col" class="n">Fixed</th><th scope="col" class="n">Overdue</th><th scope="col" class="n">Updates</th><th scope="col">Last update</th></tr></thead><tbody id="acct-rows"></tbody></table></div>
+      </div>
+      <div>
+        <h3 class="sub-h">Recent activity</h3>
+        <ul class="feed" id="feed"></ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <section class="card" id="by-community">
+      <h2>Open items by community</h2>
+      <p class="note">Items still open per community, with the ones already marked fixed at the end of each bar. Click a row to filter the fix list.</p>
+      <div class="legend"><span data-prio="High">High</span><span data-prio="Medium">Medium</span><span data-prio="Low">Low</span><span class="fixed-key">Marked fixed</span></div>
+      <div class="chart" id="chart-comm"></div>
+    </section>
+    <section class="card" id="by-area">
+      <h2>Open items by check area</h2>
+      <p class="note">Where the remaining work sits for the current division and community.</p>
+      <div class="legend"><span data-prio="High">High</span><span data-prio="Medium">Medium</span><span data-prio="Low">Low</span></div>
+      <div class="chart" id="chart-area"></div>
+    </section>
+  </div>
+
+  <section class="card" id="fix-list">
+    <h2>Fix list</h2>
+    <p class="note">Tick <b>Done</b> when a fix is live on the site. Click any row to set another status (In progress, Needs decision), add a note, and see who changed it and when. Sign in with your name and the team passcode to make changes. Corporate Marketing confirms fixes in the next bi-weekly scan.</p>
+    <div class="signin" id="signin">
+      <label class="field" id="si-name-wrap">Your name
+        <input id="si-name" type="text" autocomplete="name" maxlength="80" placeholder="e.g. Krista H.">
+      </label>
+      <label class="field" id="si-pass-wrap">Team passcode
+        <input id="si-pass" type="password" autocomplete="current-password" maxlength="200">
+      </label>
+      <button class="btn primary" type="button" id="si-save">Sign in to edit</button>
+      <span class="signin-who" id="si-who" hidden>Editing as <b id="si-who-name"></b></span>
+      <button class="btn" type="button" id="si-out" hidden>Sign out</button>
+    </div>
+    <p class="notice" id="access-note" hidden></p>
+    <div class="chips" role="group" aria-label="Priority">
+      <span class="chips-label">Priority</span>
+      <button class="chip" type="button" data-prio="Open" data-p="Open" aria-pressed="true">High, Medium, Low</button>
+      <button class="chip" type="button" data-prio="High" data-p="High" aria-pressed="false">High</button>
+      <button class="chip" type="button" data-prio="Medium" data-p="Medium" aria-pressed="false">Medium</button>
+      <button class="chip" type="button" data-prio="Low" data-p="Low" aria-pressed="false">Low</button>
+      <button class="chip" type="button" data-prio="Heads-Up" data-p="Heads-Up" aria-pressed="false">Heads-Up</button>
+      <button class="chip" type="button" data-prio="No Change" data-p="No Change" aria-pressed="false">No Change</button>
+    </div>
+    <div class="chips" role="group" aria-label="Status">
+      <span class="chips-label">Status</span>
+      <button class="chip plain" type="button" data-s="todo" aria-pressed="true">Still to do</button>
+      <button class="chip plain" type="button" data-s="Fixed" aria-pressed="false">Marked fixed</button>
+      <button class="chip plain" type="button" data-s="all" aria-pressed="false">All</button>
+      <span class="note" id="list-count"></span>
+    </div>
+    <div class="tablewrap">
+      <table class="fix">
+        <thead>
+          <tr>
+            <th scope="col" class="c-done">Done</th>
+            <th scope="col">Finding ID</th>
+            <th scope="col">Priority</th>
+            <th scope="col">Community</th>
+            <th scope="col">Check</th>
+            <th scope="col">Fix</th>
+            <th scope="col">Owner</th>
+            <th scope="col">Due</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody id="rows"><tr><td colspan="9" class="empty">Loading the run 2 findings…</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="detail" id="detail" hidden>
+      <div class="detail-head">
+        <h3>Finding <span id="d-id"></span></h3>
+        <button class="btn" type="button" id="d-close">Close</button>
+      </div>
+      <div class="detail-grid">
+        <dl class="kv">
+          <dt>Check</dt><dd id="d-check"></dd>
+          <dt>Community</dt><dd id="d-community"></dd>
+          <dt>Page type</dt><dd id="d-ptype"></dd>
+          <dt>Fix</dt><dd id="d-fix"></dd>
+          <dt>Expected</dt><dd id="d-expected"></dd>
+          <dt>Found</dt><dd class="long" id="d-found"></dd>
+          <dt>Pages</dt><dd class="long" id="d-source"></dd>
+          <dt>Open the page</dt><dd id="d-link"></dd>
+          <dt>Owner</dt><dd id="d-owner"></dd>
+        </dl>
+        <div class="update" id="d-update">
+          <h4>Update status</h4>
+          <label>Status
+            <select id="d-status">
+              <option>Open</option>
+              <option>In progress</option>
+              <option>Fixed</option>
+              <option>Needs decision</option>
+            </select>
+          </label>
+          <label>Note for Corporate (optional)
+            <textarea id="d-note" maxlength="600" placeholder="e.g. APR corrected on all 7 home pages; waiting on ONeil for the footer line"></textarea>
+          </label>
+          <div class="update-actions">
+            <button class="btn primary" type="button" id="d-save">Save update</button>
+            <span class="note" id="d-saved"></span>
+          </div>
+          <h4>History</h4>
+          <ul class="history" id="d-history"><li class="meta">No updates yet.</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="coverage">
+    <h2>Not checked yet</h2>
+    <p class="note">Checks that didn't run, or ran only in part, and what each one is waiting on. The results above don't include them.</p>
+    <div class="scroll">
+      <table class="cov">
+        <thead><tr><th scope="col">Area</th><th scope="col">Checks</th><th scope="col">Status</th><th scope="col">What's needed</th></tr></thead>
+        <tbody id="cov-rows"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="audit-core.js"></script>
+<script>
+(() => {
+  const OPEN = ['High', 'Medium', 'Low'];
+  const ORDER = {High: 0, Medium: 1, Low: 2, 'Heads-Up': 3, 'No Change': 4};
+  const STATUSES = ['Open', 'In progress', 'Fixed', 'Needs decision'];
+  const COLOR = {High: 'var(--high)', Medium: 'var(--med)', Low: 'var(--low)'};
+  const DEFAULTS = {division: 'Colorado', community: 'All', prio: 'Open', state: 'todo', q: '', sel: null};
+  const S = {rows: [], cov: [], pages: [], prev: null, apiFailed: false, badPass: false, gotStatus: false, status: new Map(), f: {...DEFAULTS}, db: null, user: null, uid: null, canWrite: null, readOnly: false, pending: new Set(), names: {}};
+  const $ = (id) => document.getElementById(id);
+  const API = '/api/status';
+  // Name and team passcode are remembered in this browser only.
+  let CREDS = {name: '', pass: ''};
+  try { CREDS = Object.assign(CREDS, JSON.parse(localStorage.getItem('wa-creds') || '{}')); } catch (e) {}
+  const saveCreds = () => { try { localStorage.setItem('wa-creds', JSON.stringify(CREDS)); } catch (e) {} };
+  const fmt = (n) => d3.format(',')(n);
+  const dateFmt = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) + ', ' + d.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'}); };
+
+  let toastTimer = null;
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 4200);
+  }
+
+  // ---------- status helpers ----------
+  const actionable = (r) => r.priority !== 'No Change';
+  // Due dates, overdue and "Still failing" (marked fixed before this scan, yet the scan still found it) come from audit-core.js, shared with the deck.
+  let CORE = null;
+  const core = () => (CORE || (CORE = AuditCore.make(S.rows, S.status, new Date())));
+  const statusOf = (r) => core().statusOf(r);
+  const isFixed = (r) => statusOf(r) === 'Fixed';
+  const model = () => AuditCore.model({rows: S.rows, cov: S.cov, pages: S.pages, status: S.status, prev: S.prev, names: S.names, division: S.f.division, community: S.f.community, today: new Date()});
+
+  // ---------- filtering ----------
+  const inScope = (r) => (S.f.division === 'All' || r.division === S.f.division) && (S.f.community === 'All' || r.community === S.f.community);
+  const inDivision = (r) => S.f.division === 'All' || r.division === S.f.division;
+  function listRows() {
+    const q = S.f.q.trim().toLowerCase();
+    return S.rows.filter((r) => inScope(r)
+      && (S.f.prio === 'Open' ? OPEN.includes(r.priority) : r.priority === S.f.prio)
+      && (r.priority === 'No Change' || S.f.state === 'all' || (S.f.state === 'Fixed' ? isFixed(r) : !isFixed(r)))
+      && (!q || [r.id, r.community, r.check_label, r.finding, r.found, r.owner, r.page_type, (S.status.get(r.id) || {}).note || ''].join(' ').toLowerCase().includes(q)))
+      .sort((a, b) => ORDER[a.priority] - ORDER[b.priority] || a.community.localeCompare(b.community) || a.check_id.localeCompare(b.check_id));
+  }
+
+  // ---------- render ----------
+  function renderHeader() {
+    const scope = S.rows.filter(inScope);
+    const open = scope.filter((r) => OPEN.includes(r.priority));
+    const fixed = open.filter(isFixed).length;
+    $('tk-high').textContent = fmt(scope.filter((r) => r.priority === 'High' && !isFixed(r)).length);
+    $('tk-open').textContent = fmt(open.length - fixed);
+    $('tk-fixed').textContent = fmt(fixed);
+    $('tk-ok').textContent = fmt(scope.filter((r) => r.priority === 'No Change').length);
+    const pct = open.length ? fixed / open.length : 0;
+    $('progress-fill').style.width = (pct * 100).toFixed(1) + '%';
+    $('progress-pct').textContent = d3.format('.0%')(pct) + ' (' + fmt(fixed) + ' of ' + fmt(open.length) + ')';
+    if (S.rows.length) $('run-date').textContent = d3.utcFormat('%b %-d, %Y')(new Date(S.rows[0].run_date + 'T00:00:00Z'));
+    const ps = S.pages.filter((p) => S.f.division === 'All' || p.division === S.f.division);
+    $('scope-pages').textContent = fmt(ps.length);
+    $('scope-comms').textContent = fmt(new Set(ps.map((p) => p.community).filter((c) => !c.startsWith('Colorado (region'))).size);
+  }
+
+  function renderTiles() {
+    const scope = S.rows.filter(inScope);
+    document.querySelectorAll('.tile').forEach((t) => t.setAttribute('aria-pressed', String(t.dataset.prio === S.f.prio)));
+    for (const p of ['High', 'Medium', 'Low', 'Heads-Up', 'No Change']) {
+      const all = scope.filter((r) => r.priority === p);
+      const left = p === 'No Change' ? all.length : all.filter((r) => !isFixed(r)).length;
+      document.querySelectorAll(`.tile-num[data-k="${p}"]`).forEach((el) => { el.textContent = fmt(left); });
+      document.querySelectorAll(`.tile-sub[data-sub="${p}"]`).forEach((el) => {
+        const done = all.length - left;
+        el.textContent = p === 'Heads-Up' ? `${fmt(done)} of ${fmt(all.length)} resolved` : `still open · ${fmt(done)} of ${fmt(all.length)} fixed`;
+      });
+    }
+  }
+
+  function renderSelects() {
+    const dSel = $('f-division');
+    const divs = [...new Set(S.rows.map((r) => r.division))].sort();
+    dSel.replaceChildren(new Option('All divisions', 'All'), ...divs.map((d) => new Option(d, d)));
+    dSel.value = S.f.division;
+    const cSel = $('f-community');
+    const comms = [...new Set(S.rows.filter(inDivision).map((r) => r.community))].sort((a, b) => a.localeCompare(b));
+    cSel.replaceChildren(new Option('All communities', 'All'), ...comms.map((c) => new Option(c, c)));
+    if (!comms.includes(S.f.community)) S.f.community = 'All';
+    cSel.value = S.f.community;
+    if (document.activeElement !== $('f-q')) $('f-q').value = S.f.q;
+  }
+
+  function bars(el, items, opts) {
+    el.replaceChildren();
+    if (!items.length) { const p = document.createElement('p'); p.className = 'note'; p.textContent = opts.empty; el.append(p); return; }
+    const W = Math.max(300, el.clientWidth || 600);
+    const rowH = 24, gap = 7;
+    const svg = d3.select(el).append('svg');
+    const probe = svg.append('text');
+    const measure = (t) => { probe.text(t); return probe.node().getComputedTextLength(); };
+    const cap = W * 0.4;
+    items.forEach((d) => {
+      let s = d.label;
+      if (measure(s) > cap - 14) { while (s.length > 4 && measure(s + '…') > cap - 14) s = s.slice(0, -1); s += '…'; }
+      d.shown = s;
+    });
+    const labelW = Math.min(cap, d3.max(items, (d) => measure(d.shown)) + 14);
+    const ends = items.map(opts.end);
+    const endW = d3.max(ends, measure) + 16;
+    probe.remove();
+    const H = items.length * (rowH + gap);
+    svg.attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const total = (d) => d.High + d.Medium + d.Low + (opts.showFixed ? d.fixed : 0);
+    const x = d3.scaleLinear([0, d3.max(items, total) || 1], [labelW, Math.max(labelW + 40, W - endW)]);
+    const tip = d3.select(el).append('div').attr('class', 'tip').style('display', 'none');
+    const rows = svg.selectAll('g.row').data(items).join('g').attr('class', 'row')
+      .attr('transform', (d, i) => `translate(0,${i * (rowH + gap)})`)
+      .attr('tabindex', opts.click ? 0 : null).attr('role', opts.click ? 'button' : null)
+      .attr('aria-label', (d) => `${d.label}: ${d.High} high, ${d.Medium} medium, ${d.Low} low open` + (opts.showFixed ? `, ${d.fixed} fixed` : ''))
+      .style('opacity', (d) => (opts.focus && opts.focus !== 'All' && d.key !== opts.focus ? 0.35 : 1))
+      .on('click', (e, d) => opts.click && opts.click(d.key))
+      .on('keydown', (e, d) => { if (opts.click && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); opts.click(d.key); } });
+    rows.append('rect').attr('class', 'rowbg').attr('x', 0).attr('y', -3).attr('width', W).attr('height', rowH + 6).attr('rx', 3).attr('fill', 'transparent');
+    rows.append('text').attr('x', labelW - 10).attr('y', rowH / 2).attr('dy', '0.35em').attr('text-anchor', 'end').text((d) => d.shown);
+    const segs = ['High', 'Medium', 'Low'].concat(opts.showFixed ? ['fixed'] : []);
+    segs.forEach((k, ki) => {
+      rows.append('rect')
+        .attr('x', (d) => x(segs.slice(0, ki).reduce((s, kk) => s + d[kk], 0)))
+        .attr('y', 3).attr('height', rowH - 6)
+        .attr('width', (d) => Math.max(0, x(d[k]) - x(0) - (d[k] ? 1 : 0)))
+        .attr('rx', 2)
+        .style('fill', k === 'fixed' ? 'color-mix(in srgb, var(--ok) 45%, transparent)' : COLOR[k]);
+    });
+    rows.append('text').attr('class', 'end').attr('x', (d) => x(total(d)) + 6).attr('y', rowH / 2).attr('dy', '0.35em').text((d, i) => ends[i]);
+    rows.on('mousemove', (e, d) => {
+      const [mx, my] = d3.pointer(e, el);
+      tip.style('display', null).html('');
+      tip.append('div').attr('class', 'h').text(d.label);
+      ['High', 'Medium', 'Low'].forEach((k) => { const l = tip.append('div'); l.append('i').style('background', COLOR[k]); l.append('span').text(`${k} open: ${d[k]}`); });
+      if (opts.showFixed) { const l = tip.append('div'); l.append('i').style('background', 'color-mix(in srgb, var(--ok) 45%, transparent)'); l.append('span').text(`Marked fixed: ${d.fixed}`); }
+      if (d.ok != null) tip.append('div').attr('class', 'h').text(`${d.ok} checks meet the standard`);
+      const tw = tip.node().offsetWidth, th = tip.node().offsetHeight;
+      tip.style('left', Math.min(Math.max(0, mx + 12), el.clientWidth - tw) + 'px').style('top', Math.max(0, my - th - 8) + 'px');
+    }).on('mouseleave', () => tip.style('display', 'none'));
+  }
+
+  function renderCharts() {
+    const div = S.rows.filter(inDivision);
+    const byComm = d3.group(div, (r) => r.community);
+    const comm = [...byComm].map(([c, rs]) => {
+      const left = (p) => rs.filter((r) => r.priority === p && !isFixed(r)).length;
+      return {key: c, label: c === 'All Colorado' ? 'Site-wide (all Colorado pages)' : c, High: left('High'), Medium: left('Medium'), Low: left('Low'),
+        fixed: rs.filter((r) => OPEN.includes(r.priority) && isFixed(r)).length, ok: rs.filter((r) => r.priority === 'No Change').length};
+    }).filter((d) => d.High + d.Medium + d.Low + d.fixed + d.ok > 0 && (d.High + d.Medium + d.Low + d.fixed > 0 || d.ok > 0))
+      .sort((a, b) => b.High - a.High || (b.High + b.Medium + b.Low) - (a.High + a.Medium + a.Low));
+    bars($('chart-comm'), comm, {showFixed: true, focus: S.f.community, end: (d) => `${d.High + d.Medium + d.Low} open · ${d.fixed} fixed`,
+      click: (k) => { S.f.community = S.f.community === k ? 'All' : k; S.f.sel = null; renderAll(); }, empty: 'No findings for this division.'});
+    const scope = S.rows.filter(inScope).filter((r) => OPEN.includes(r.priority) && !isFixed(r));
+    const area = [...d3.group(scope, (r) => r.area)].map(([a, rs]) => {
+      const c = (p) => rs.filter((r) => r.priority === p).length;
+      return {key: a, label: a, High: c('High'), Medium: c('Medium'), Low: c('Low'), fixed: 0};
+    }).sort((x, y) => y.High - x.High || (y.High + y.Medium + y.Low) - (x.High + x.Medium + x.Low));
+    bars($('chart-area'), area, {showFixed: false, end: (d) => `${d.High + d.Medium + d.Low} open`, click: null, empty: 'Nothing left open here.'});
+  }
+
+  function whoLine(r) {
+    const s = S.status.get(r.id);
+    if (!s || !s.at) return null;
+    const span = document.createElement('span');
+    span.className = 'who';
+    span.dataset.uid = s.by || '';
+    span.dataset.at = s.at;
+    span.textContent = (s.by ? (S.names[s.by] || 'Someone') : 'Someone') + ' · ' + dateFmt(s.at);
+    return span;
+  }
+
+  function renderList() {
+    document.querySelectorAll('.chip[data-p]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.p === S.f.prio)));
+    document.querySelectorAll('.chip[data-s]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.s === S.f.state)));
+    const rows = listRows();
+    $('list-count').textContent = `${fmt(rows.length)} shown`;
+    const tbody = $('rows');
+    tbody.replaceChildren();
+    if (!S.rows.length) return;
+    if (!rows.length) {
+      const tr = document.createElement('tr'); const td = document.createElement('td');
+      td.colSpan = 9; td.className = 'empty';
+      td.textContent = S.f.state === 'Fixed' ? 'Nothing marked fixed yet for these filters.' : 'No findings match these filters.';
+      tr.append(td); tbody.append(tr); return;
+    }
+    const frag = document.createDocumentFragment();
+    const canEdit = !!S.db && !S.readOnly && S.canWrite === true;
+    for (const r of rows) {
+      const tr = document.createElement('tr');
+      tr.dataset.id = r.id; tr.tabIndex = 0;
+      tr.setAttribute('aria-selected', String(r.id === S.f.sel));
+      if (isFixed(r)) tr.classList.add('done');
+      const td = (cls, text) => { const c = document.createElement('td'); if (cls) c.className = cls; if (text != null) c.textContent = text; tr.append(c); return c; };
+      const dc = td('c-done');
+      if (actionable(r)) {
+        const cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.checked = isFixed(r); cb.dataset.id = r.id;
+        cb.disabled = !canEdit || S.pending.has(r.id);
+        cb.setAttribute('aria-label', `Mark ${r.id} fixed`);
+        dc.append(cb);
+      }
+      td('c-id', r.id);
+      const pc = td(); const pill = document.createElement('span'); pill.className = 'pill'; pill.dataset.prio = r.priority; pill.textContent = r.priority; pc.append(pill);
+      td(null, r.community);
+      td(null, r.check_label);
+      td('c-fix', r.finding);
+      td(null, r.owner);
+      const due = core().dueOf(r);
+      const dcell = td('due');
+      if (due && !isFixed(r)) {
+        dcell.textContent = AuditCore.fmtDay(due);
+        if (core().isOverdue(r)) { dcell.classList.add('late'); const t = document.createElement('span'); t.className = 'late-tag'; t.textContent = 'Overdue'; dcell.append(t); }
+      } else dcell.textContent = due ? '—' : '';
+      const sc = td('c-status');
+      const st = statusOf(r);
+      if (st) { const s = document.createElement('span'); s.className = 'st'; s.dataset.st = st; s.textContent = st; sc.append(s); }
+      const w = whoLine(r); if (w) sc.append(w);
+      frag.append(tr);
+    }
+    tbody.append(frag);
+    resolveNames();
+  }
+
+  async function resolveNames() {
+    if (!S.user) return;
+    const ids = [...new Set([...S.status.values()].flatMap((s) => [s.by, ...((s.history || []).map((h) => h.by))]).filter(Boolean))];
+    if (!ids.length) return;
+    const ps = await S.user.profiles(ids);
+    let changed = false;
+    for (const id of ids) { const n = (ps[id] && ps[id].name) || ''; if (n && S.names[id] !== n) { S.names[id] = n; changed = true; } }
+    if (!changed) return;
+    renderChanges();
+    document.querySelectorAll('.who[data-uid], .history [data-uid]').forEach((el) => {
+      const n = S.names[el.dataset.uid];
+      if (n) el.textContent = n + ' · ' + dateFmt(el.dataset.at);
+    });
+  }
+
+  function renderDetail() {
+    const r = S.f.sel ? S.rows.find((x) => x.id === S.f.sel) : null;
+    $('detail').hidden = !r;
+    if (!r) return;
+    $('d-id').textContent = r.id;
+    $('d-check').textContent = r.check_label;
+    $('d-community').textContent = r.community;
+    $('d-ptype').textContent = r.page_type;
+    $('d-fix').textContent = r.finding;
+    $('d-expected').textContent = r.expected || '—';
+    $('d-found').textContent = r.found || '—';
+    $('d-source').textContent = r.source || '—';
+    $('d-owner').textContent = r.owner || '—';
+    const link = $('d-link'); link.replaceChildren();
+    if (r.link) { const a = document.createElement('a'); a.href = r.link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = r.link; link.append(a); } else link.textContent = '—';
+    const s = S.status.get(r.id) || {};
+    const upd = $('d-update');
+    upd.hidden = !actionable(r);
+    const statusSel = $('d-status'), note = $('d-note');
+    if (upd.dataset.for !== r.id) {
+      upd.dataset.for = r.id;
+      statusSel.value = statusOf(r) || 'Open';
+      note.value = s.note || '';
+      $('d-saved').textContent = '';
+    }
+    const canEdit = !!S.db && !S.readOnly && S.canWrite === true;
+    statusSel.disabled = !canEdit; note.disabled = !canEdit;
+    $('d-save').disabled = !canEdit || S.pending.has(r.id);
+    const hist = $('d-history'); hist.replaceChildren();
+    const items = s.history || [];
+    if (!items.length) { const li = document.createElement('li'); li.className = 'meta'; li.textContent = 'No updates yet.'; hist.append(li); }
+    for (const h of items) {
+      const li = document.createElement('li');
+      const top = document.createElement('span'); top.textContent = 'Set to ' + h.status + (h.note ? ' — ' + h.note : '');
+      const meta = document.createElement('span'); meta.className = 'meta'; meta.dataset.uid = h.by || ''; meta.dataset.at = h.at;
+      meta.textContent = (h.by ? (S.names[h.by] || 'Someone') : 'Someone') + ' · ' + dateFmt(h.at);
+      li.append(top, meta); hist.append(li);
+    }
+  }
+
+  function renderCoverage() {
+    const tb = $('cov-rows'); tb.replaceChildren();
+    for (const r of S.cov.filter((x) => x.ran !== 'Yes')) {
+      const tr = document.createElement('tr');
+      const td = (t, cls) => { const e = document.createElement('td'); if (cls) e.className = cls; e.textContent = t; tr.append(e); };
+      td(r.area); td(r.checks); td(r.status, r.ran === 'No' ? 'cov-no' : 'cov-part'); td(r.needed);
+      tb.append(tr);
+    }
+  }
+
+  function renderChanges() {
+    if (!S.rows.length) return;
+    const m = model();
+    const scan = $('ch-scan'); scan.replaceChildren();
+    const h = document.createElement('h3'); h.textContent = 'Since the last scan'; scan.append(h);
+    if (m.diff.baseline) {
+      const p = document.createElement('p'); p.className = 'note';
+      p.textContent = `No comparison yet. The ${m.runDate} scan is the first full run, so it is the baseline. From the next scan (planned ${m.nextRun}) this shows new, cleared, carried-over and returning items, and anything marked fixed that the scan still finds.`;
+      scan.append(p);
+    } else {
+      const st = document.createElement('div'); st.className = 'stats';
+      for (const [v, l, warn] of [[m.diff.added, 'new'], [m.diff.resolved, 'cleared'], [m.diff.carried, 'carried over'], [m.diff.regressed, 'came back', true], [m.diff.stillFailing, 'marked fixed, still failing', true]]) {
+        const d = document.createElement('div'); d.className = 'stat' + (warn && v ? ' warn' : '');
+        const b = document.createElement('b'); b.textContent = fmt(v); const sp = document.createElement('span'); sp.textContent = l; d.append(b, sp); st.append(d);
+      }
+      const p = document.createElement('p'); p.className = 'note'; p.textContent = `Compared with the scan of ${m.diff.prevDate}.`;
+      scan.append(p, st);
+    }
+    $('ch-updates').textContent = fmt(m.activity.updates);
+    $('ch-fixed').textContent = fmt(m.activity.fixed);
+    $('ch-prog').textContent = fmt(m.activity.progress);
+    $('ch-overdue').textContent = fmt(m.totals.overdue);
+    const sil = $('ch-silent'); sil.replaceChildren();
+    const b = document.createElement('b'); b.textContent = `No updates yet (${m.activity.silent.length}): `;
+    sil.classList.toggle('none', !m.activity.silent.length);
+    sil.append(b, document.createTextNode(m.activity.silent.length ? m.activity.silent.join(', ') : 'every community with open items has at least one update.'));
+    const tb = $('acct-rows'); tb.replaceChildren();
+    for (const c of m.communities) {
+      const tr = document.createElement('tr'); tr.dataset.key = c.key; tr.tabIndex = 0;
+      const td = (t, cls) => { const e = document.createElement('td'); if (cls) e.className = cls; e.textContent = t; tr.append(e); };
+      td(c.name); td(fmt(c.high), 'n' + (c.high ? ' hot' : '')); td(fmt(c.open), 'n'); td(fmt(c.fixed), 'n'); td(fmt(c.overdue), 'n' + (c.overdue ? ' hot' : '')); td(fmt(c.updates), 'n');
+      td(c.lastUpdate || (c.open ? 'No updates yet' : '—'), c.lastUpdate ? '' : (c.open ? 'none' : ''));
+      tb.append(tr);
+    }
+    const feed = $('feed'); feed.replaceChildren();
+    if (!m.activity.recent.length) { const li = document.createElement('li'); li.className = 'meta'; li.textContent = 'No tracker updates since the scan yet.'; feed.append(li); }
+    for (const e of m.activity.recent) {
+      const li = document.createElement('li');
+      const top = document.createElement('span'); top.textContent = `${e.id} → ${e.status}${e.note ? ' — ' + e.note : ''}`;
+      const meta = document.createElement('div'); meta.className = 'meta'; meta.dataset.uid = e.by || ''; meta.dataset.at = e.at;
+      meta.textContent = `${e.community} · ${(e.by && S.names[e.by]) || 'Someone'} · ${dateFmt(e.at)}`;
+      li.append(top, meta); feed.append(li);
+    }
+  }
+
+  // ---------- presentation export ----------
+  const loadScript = (src) => new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error(src)); document.head.append(s); });
+  let deckLibs = null;
+  async function downloadDeck() {
+    const btn = $('dl-deck'); const label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Building presentation…';
+    try {
+      if (!deckLibs) deckLibs = Promise.all([loadScript('https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js'), loadScript('deck.js')]);
+      await deckLibs;
+      const m = model();
+      const pptx = window.buildAuditDeck(window.PptxGenJS, m);
+      const data = await pptx.write({outputType: 'blob'});
+      const slug = m.scopeLabel.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const day = new Date().toISOString().slice(0, 10);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(data);
+      a.download = `Website-Audit-${slug}-${day}.pptx`;
+      document.body.append(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+    } catch (e) {
+      deckLibs = null;
+      toast("The presentation couldn't be built. Check your connection and try again.");
+    } finally { btn.disabled = false; btn.textContent = label; }
+  }
+  $('dl-deck').addEventListener('click', downloadDeck);
+  // Opened with #report at the end of the address (for example from a link in an email): build the deck once the findings and the fix statuses are in.
+  const AUTO = /^#report\b/.test(location.hash || '');
+  let autoDone = false;
+  function maybeAutoDeck() {
+    if (!AUTO || autoDone || !S.rows.length || !S.gotStatus) return;
+    autoDone = true;
+    $('dl-deck').scrollIntoView({block: 'center'});
+    downloadDeck();
+  }
+
+  function renderAccess() {
+    const n = $('access-note');
+    let msg = '';
+    if (!S.db) msg = S.apiFailed ? "Fix statuses didn't load, so this view is read-only. Reload the page; if it keeps failing, tell the site owner." : '';
+    else if (S.badPass) msg = 'That team passcode was not accepted. Re-enter it to mark items fixed.';
+    else if (!S.canWrite) msg = 'View only. Enter your name and the team passcode to mark items fixed.';
+    n.textContent = msg; n.hidden = !msg;
+    const signed = !!S.canWrite;
+    $('si-name-wrap').hidden = signed; $('si-pass-wrap').hidden = signed; $('si-save').hidden = signed;
+    $('si-who').hidden = !signed; $('si-out').hidden = !signed;
+    $('si-who-name').textContent = CREDS.name || '';
+  }
+
+  function renderAll() {
+    CORE = null;
+    renderChanges();
+    renderSelects(); renderHeader(); renderTiles(); renderCharts(); renderList(); renderDetail(); renderAccess();
+  }
+
+  // ---------- writing status ----------
+  async function writeStatus(id, status, note) {
+    if (!S.db || !S.canWrite || S.pending.has(id)) return false;
+    S.pending.add(id); renderList(); renderDetail();
+    try {
+      const r = await fetch(API, {method: 'POST', headers: {'content-type': 'application/json', 'x-edit-passcode': CREDS.pass},
+        body: JSON.stringify({id, status, note: note != null ? note : null, by: CREDS.name})});
+      if (r.status === 401) { S.canWrite = false; S.badPass = true; toast("Your change wasn't saved: the team passcode was not accepted."); return false; }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const doc = await r.json();
+      S.status.set(id, doc); nameAll(doc);
+      return true;
+    } catch (e) {
+      toast("Your change wasn't saved. Check your connection and try again.");
+      return false;
+    } finally {
+      S.pending.delete(id); renderAll();
+    }
+  }
+
+  // ---------- events ----------
+  $('f-division').addEventListener('change', (e) => { S.f.division = e.target.value; S.f.community = 'All'; S.f.sel = null; renderAll(); });
+  $('f-community').addEventListener('change', (e) => { S.f.community = e.target.value; S.f.sel = null; renderAll(); });
+  let qTimer = null;
+  $('f-q').addEventListener('input', (e) => { clearTimeout(qTimer); qTimer = setTimeout(() => { S.f.q = e.target.value; S.f.sel = null; renderList(); renderDetail(); }, 150); });
+  $('f-reset').addEventListener('click', () => { S.f = {...DEFAULTS}; $('f-q').value = ''; renderAll(); });
+  document.querySelectorAll('.tile').forEach((t) => t.addEventListener('click', () => {
+    S.f.prio = S.f.prio === t.dataset.prio ? 'Open' : t.dataset.prio; S.f.sel = null; renderAll();
+    $('fix-list').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
+  }));
+  document.querySelectorAll('.chip[data-p]').forEach((c) => c.addEventListener('click', () => { S.f.prio = c.dataset.p; S.f.sel = null; renderAll(); }));
+  document.querySelectorAll('.chip[data-s]').forEach((c) => c.addEventListener('click', () => { S.f.state = c.dataset.s; S.f.sel = null; renderList(); renderDetail(); }));
+  $('rows').addEventListener('change', async (e) => {
+    const cb = e.target.closest('input[type=checkbox][data-id]');
+    if (!cb) return;
+    const id = cb.dataset.id;
+    const ok = await writeStatus(id, cb.checked ? 'Fixed' : 'Open', null);
+    if (ok) toast(cb.checked ? `${id} marked fixed.` : `${id} reopened.`);
+  });
+  $('rows').addEventListener('click', (e) => {
+    if (e.target.closest('.c-done')) return;
+    const tr = e.target.closest('tr[data-id]');
+    if (!tr) return;
+    S.f.sel = S.f.sel === tr.dataset.id ? null : tr.dataset.id;
+    renderList(); renderDetail();
+    if (S.f.sel) $('detail').scrollIntoView({behavior: 'auto', block: 'nearest'});
+  });
+  $('rows').addEventListener('keydown', (e) => {
+    const tr = e.target.closest('tr[data-id]');
+    if (!tr || e.target.matches('input')) return;
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); S.f.sel = tr.dataset.id; renderList(); renderDetail(); }
+  });
+  const pickComm = (tr) => { S.f.community = S.f.community === tr.dataset.key ? 'All' : tr.dataset.key; S.f.sel = null; renderAll(); };
+  $('acct-rows').addEventListener('click', (e) => { const tr = e.target.closest('tr[data-key]'); if (tr) pickComm(tr); });
+  $('acct-rows').addEventListener('keydown', (e) => { const tr = e.target.closest('tr[data-key]'); if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); pickComm(tr); } });
+  $('d-close').addEventListener('click', () => { S.f.sel = null; renderList(); renderDetail(); });
+  $('d-save').addEventListener('click', async () => {
+    const id = S.f.sel; if (!id) return;
+    const ok = await writeStatus(id, $('d-status').value, $('d-note').value.trim());
+    if (ok) { $('d-saved').textContent = 'Saved'; toast(`${id} set to ${$('d-status').value}.`); }
+  });
+  let rz = null;
+  new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(renderCharts, 120); }).observe(document.querySelector('.grid2'));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (S.rows.length) renderCharts(); });
+
+  // ---------- load data ----------
+  async function loadJSON(name) { const r = await fetch(name, {cache: 'no-cache'}); if (!r.ok) throw new Error(name + ' ' + r.status); return r.json(); }
+  Promise.all([loadJSON('data/results.json'), loadJSON('data/coverage.json'), loadJSON('data/pages.json')])
+    .then(([rows, cov, pages]) => { S.rows = rows; S.cov = cov; S.pages = pages; renderCoverage(); renderAll(); maybeAutoDeck();
+      // previous.json is published alongside the next scan; until then this is the baseline run.
+      fetch('data/previous.json', {cache: 'no-store'}).then((r) => (r.ok ? r.json() : null)).then((p) => { if (Array.isArray(p) && p.length) { S.prev = p; renderAll(); } }).catch(() => {}); })
+    .catch(() => { $('rows').innerHTML = ''; const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan = 9; td.className = 'empty'; td.textContent = "The findings file didn't load. Reload the page; if it keeps failing, tell the tracker owner."; tr.append(td); $('rows').append(tr); });
+
+  // ---------- shared status (Netlify function + Netlify Blobs) ----------
+  // GET /api/status returns every status document; POST saves one and needs the team passcode.
+  // "by" is the editor's name as typed, so each name maps to itself.
+  function nameAll(d) { for (const by of [d.by, ...((d.history || []).map((h) => h.by))]) if (by) S.names[by] = by; }
+  async function loadStatus(check) {
+    try {
+      const headers = check && CREDS.pass ? {'x-edit-passcode': CREDS.pass} : {};
+      const r = await fetch(API, {headers, cache: 'no-store'});
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const body = await r.json();
+      const m = new Map(Object.entries(body.statuses || {}));
+      for (const d of m.values()) nameAll(d);
+      S.status = m; S.db = true; S.apiFailed = false; S.gotStatus = true;
+      if (check) { S.canWrite = !!body.canWrite && !!CREDS.name; S.badPass = !!CREDS.pass && !body.canWrite; }
+    } catch (e) {
+      if (!S.db) S.apiFailed = true;
+    }
+    if (S.rows.length) renderAll(); else renderAccess();
+    maybeAutoDeck();
+  }
+  $('si-save').addEventListener('click', async () => {
+    const name = $('si-name').value.trim(), pass = $('si-pass').value;
+    if (!name || !pass) { toast('Enter your name and the team passcode.'); return; }
+    CREDS = {name, pass}; saveCreds();
+    await loadStatus(true);
+    if (S.canWrite) { $('si-pass').value = ''; toast(`Editing as ${name}.`); }
+  });
+  $('si-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('si-save').click(); });
+  $('si-out').addEventListener('click', () => { CREDS = {name: CREDS.name, pass: ''}; saveCreds(); S.canWrite = false; S.badPass = false; renderAll(); });
+  $('si-name').value = CREDS.name || '';
+  loadStatus(!!CREDS.pass);
+  // Pick up other people's changes every 30 seconds while the tab is visible, and on coming back to it.
+  setInterval(() => { if (document.visibilityState === 'visible' && !S.pending.size) loadStatus(false); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') loadStatus(false); });
+})();
+</script>
+</body>
+</html>

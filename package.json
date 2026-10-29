@@ -1,0 +1,13 @@
+{
+  "name": "trumark-website-audit-tracker",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Division website audit tracker and presentation export, hosted on Netlify.",
+  "type": "module",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.7"
+  }
+}

@@ -30,7 +30,7 @@
       const s = get(r.id);
       if (!s || !s.status) return 'Open';
       // A fix marked before this scan ran, for a finding this scan still reports, did not hold.
-      if (s.status === 'Fixed' && runStart && new Date(s.at) < runStart) return 'Still failing';
+      if (s.status === 'Fixed' && runStart && new Date(s.at) < runStart) return 'Still found after fix';
       return s.status;
     };
     const isFixed = (r) => statusOf(r) === 'Fixed';
@@ -51,7 +51,7 @@
       if (!isOpen(r)) continue;
       const o = old.get(r.id);
       if (!o || !isOpen(o)) { added.push(r.id); if (o && o.priority === 'No Change') regressed.push(r.id); }
-      else { carried.push(r.id); if (core.statusOf(r) === 'Still failing') stillFailing.push(r.id); }
+      else { carried.push(r.id); if (core.statusOf(r) === 'Still found after fix') stillFailing.push(r.id); }
     }
     for (const o of prev) { if (!isOpen(o)) continue; const r = cur.get(o.id); if (!r || !isOpen(r)) resolved.push(o.id); }
     return {baseline: false, prevDate: fmtDate(utcDate(prev[0].run_date)), added: added.length, carried: carried.length,

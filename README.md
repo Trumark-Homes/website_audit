@@ -7,7 +7,7 @@ The Trumark division website audit as a hosted web page. In one place it has the
 | Path | What it is |
 |---|---|
 | `public/index.html` | The page: dashboard, fix list, What Changed, and presentation download |
-| `public/audit-core.js` | Shared logic: due dates, overdue, "Still failing", scan-to-scan diff, activity |
+| `public/audit-core.js` | Shared logic: due dates, overdue, "Still found after fix", scan-to-scan diff, activity |
 | `public/deck.js` | Builds the PowerPoint in the Division Website Audit layout (uses PptxGenJS) |
 | `public/data/results.json` | Findings from the latest scan (run 2, Oct 28, 2026) |
 | `public/data/coverage.json` | What the scan checked and didn't check |
@@ -43,7 +43,15 @@ Use Git or the Netlify CLI rather than drag-and-drop. Drag-and-drop is meant for
 2. Replace `public/data/results.json`, `coverage.json` and `pages.json` with the new scan's files.
 3. Commit. Netlify redeploys on its own.
 
-Once `previous.json` exists, What Changed shows the scan-to-scan comparison. That covers new items, cleared items, carried-over items, items that came back, and items marked fixed that the scan still finds. **Finding IDs must stay the same from scan to scan** (for example `CO-BV-INC05`). The comparison and the saved statuses both match findings by ID.
+Once `previous.json` exists, What Changed shows the scan-to-scan comparison. That covers new items, cleared items, carried-over items, items that came back, and items marked fixed that the scan still finds ("Still found after fix"). **Finding IDs must stay the same from scan to scan** (for example `CO-BV-INC05`). The comparison and the saved statuses both match findings by ID.
+
+## Views and grouping
+
+- **View:** *Division fixes* (default) shows items whose owner names the division. *Corporate & vendor* shows Corporate Marketing and Homefiniti template (O'Neil) items. The split is read from each finding's `owner` field, so keep the division name in the owner for anything the division should fix.
+- **Page type:** combined page types such as "Neighborhood, Plan, Available Home" are split, so a finding shows under each page type it covers.
+- **Priority:** the fix list opens on High & Medium. Low items are one click away ("Show Low items").
+- **Grouping:** the same check at the same priority across several communities shows as one row. Click it to see each finding. Ticking the group's box marks every item in it fixed.
+- The presentation download and the What Changed panel cover the whole division, whatever the View is set to.
 
 ## Notes
 

@@ -126,6 +126,16 @@
   .c-done input:disabled { cursor: not-allowed; }
   .c-id { font-family: var(--mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
   .c-fix { min-width: 22rem; max-width: 34rem; }
+  table.fix tbody tr.grp td { background: color-mix(in srgb, var(--teal) 5%, transparent); }
+  table.fix tbody tr.grp .c-id { white-space: nowrap; font-weight: 600; }
+  table.fix tbody tr.grp .caret { display: inline-block; width: 1em; transition: transform .15s; }
+  table.fix tbody tr.grp[aria-expanded="true"] .caret { transform: rotate(90deg); }
+  table.fix tbody tr.child td:nth-child(2) { padding-left: 26px; }
+  table.fix tbody tr.child td { background: color-mix(in srgb, var(--mist) 55%, transparent); }
+  .grp-sub { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  [hidden] { display: none !important; }
+  .low-note { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+  .low-note button { margin-left: 6px; }
   .pill { --c: var(--muted); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; padding: 1px 9px; border-radius: 999px; font-family: var(--head); font-weight: 600; font-size: 11px; background: color-mix(in srgb, var(--c) 15%, transparent); }
   .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
   .st { --c: var(--muted); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-family: var(--head); font-weight: 600; font-size: 11px; padding: 1px 9px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); color: var(--c); }
@@ -162,7 +172,7 @@
   .cov-no { color: var(--med); font-weight: 700; white-space: nowrap; }
   .cov-part { color: var(--muted); white-space: nowrap; }
 
-  .st[data-st="Still failing"] { --c: var(--orange); }
+  .st[data-st="Still found after fix"] { --c: var(--orange); }
   .due { white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 12.5px; }
   .due.late { color: var(--orange); font-weight: 700; }
   .late-tag { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; font-family: var(--head); font-weight: 600; font-size: 10.5px; color: var(--band-ink); background: var(--orange); }
@@ -210,7 +220,7 @@
     <p class="mark">Trumark <span>Homes</span></p>
     <p class="eyebrow">Website audit · Run 2 · scanned <span id="run-date">—</span></p>
     <h1 class="title">Website audit — fix tracker</h1>
-    <p class="take"><b class="hi" id="tk-high">—</b> high-priority items still need a fix (target: 2 business days). <b id="tk-open">—</b> open items remain, <b id="tk-fixed">—</b> are marked fixed, and <b id="tk-ok">—</b> checks already meet the standard.</p>
+    <p class="take"><b id="tk-ok">—</b> checks already meet the standard. <b class="hi" id="tk-high">—</b> high-priority items need a fix (target: 2 business days), <b id="tk-open">—</b> items are open in total, and <b id="tk-fixed">—</b> are marked fixed.</p>
     <div class="progress" aria-hidden="false">
       <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
       <div class="progress-label"><b id="progress-pct">—</b> of High, Medium and Low items marked fixed for this view</div>
@@ -225,6 +235,16 @@
     <label class="field">Community
       <select id="f-community" aria-label="Community"></select>
     </label>
+    <label class="field">View
+      <select id="f-view" aria-label="View">
+        <option value="division">Division fixes</option>
+        <option value="corporate">Corporate &amp; vendor</option>
+        <option value="all">Everything</option>
+      </select>
+    </label>
+    <label class="field">Page type
+      <select id="f-ptype" aria-label="Page type"></select>
+    </label>
     <label class="field">Search findings
       <input id="f-q" type="search" placeholder="e.g. APR, alt text, Kestrel" autocomplete="off">
     </label>
@@ -234,11 +254,11 @@
   </div>
 
   <div class="tiles" id="tiles">
+    <button class="tile" type="button" data-prio="No Change" aria-pressed="false"><span class="tile-label">No Change</span><span class="tile-num" data-k="No Change">—</span><span class="tile-sub">Checks that meet the standard</span><span class="tile-note">Nothing to fix</span></button>
     <button class="tile" type="button" data-prio="High" aria-pressed="false"><span class="tile-label">High</span><span class="tile-num" data-k="High">—</span><span class="tile-sub" data-sub="High">—</span><span class="tile-note">Trust, compliance or leads · 2 business days</span></button>
     <button class="tile" type="button" data-prio="Medium" aria-pressed="false"><span class="tile-label">Medium</span><span class="tile-num" data-k="Medium">—</span><span class="tile-sub" data-sub="Medium">—</span><span class="tile-note">SEO, accessibility, completeness · next review</span></button>
     <button class="tile" type="button" data-prio="Low" aria-pressed="false"><span class="tile-label">Low</span><span class="tile-num" data-k="Low">—</span><span class="tile-sub" data-sub="Low">—</span><span class="tile-note">Polish · within 30 days or batched</span></button>
     <button class="tile" type="button" data-prio="Heads-Up" aria-pressed="false"><span class="tile-label">Heads-Up</span><span class="tile-num" data-k="Heads-Up">—</span><span class="tile-sub" data-sub="Heads-Up">—</span><span class="tile-note">Needs a decision · not counted as an issue</span></button>
-    <button class="tile" type="button" data-prio="No Change" aria-pressed="false"><span class="tile-label">No Change</span><span class="tile-num" data-k="No Change">—</span><span class="tile-sub">Checks that meet the standard</span><span class="tile-note">Nothing to fix</span></button>
   </div>
 
   <section class="card" id="changes">
@@ -286,7 +306,7 @@
 
   <section class="card" id="fix-list">
     <h2>Fix list</h2>
-    <p class="note">Tick <b>Done</b> when a fix is live on the site. Click any row to set another status (In progress, Needs decision), add a note, and see who changed it and when. Sign in with your name and the team passcode to make changes. Corporate Marketing confirms fixes in the next bi-weekly scan.</p>
+    <p class="note">Tick <b>Done</b> when a fix is live on the site. Click any row to set another status (In progress, Needs decision), add a note, and see who changed it and when. Sign in with your name and the team passcode to make changes. Corporate Marketing confirms fixes in the next bi-weekly scan. <b>Division fixes</b> shows what your team can change; <b>Corporate &amp; vendor</b> shows template and corporate items (for example, Homefiniti template changes with O'Neil). Repeated items are grouped into one row; click a group to see each page.</p>
     <div class="signin" id="signin">
       <label class="field" id="si-name-wrap">Your name
         <input id="si-name" type="text" autocomplete="name" maxlength="80" placeholder="e.g. Krista H.">
@@ -301,7 +321,8 @@
     <p class="notice" id="access-note" hidden></p>
     <div class="chips" role="group" aria-label="Priority">
       <span class="chips-label">Priority</span>
-      <button class="chip" type="button" data-prio="Open" data-p="Open" aria-pressed="true">High, Medium, Low</button>
+      <button class="chip plain" type="button" data-p="HM" aria-pressed="true">High &amp; Medium</button>
+      <button class="chip plain" type="button" data-p="Open" aria-pressed="false">All open</button>
       <button class="chip" type="button" data-prio="High" data-p="High" aria-pressed="false">High</button>
       <button class="chip" type="button" data-prio="Medium" data-p="Medium" aria-pressed="false">Medium</button>
       <button class="chip" type="button" data-prio="Low" data-p="Low" aria-pressed="false">Low</button>
@@ -314,6 +335,11 @@
       <button class="chip plain" type="button" data-s="Fixed" aria-pressed="false">Marked fixed</button>
       <button class="chip plain" type="button" data-s="all" aria-pressed="false">All</button>
       <span class="note" id="list-count"></span>
+    </div>
+    <div class="chips" role="group" aria-label="Layout">
+      <span class="chips-label">Layout</span>
+      <button class="chip plain" type="button" data-g="1" aria-pressed="true">Group repeated items</button>
+      <button class="chip plain" type="button" data-g="0" aria-pressed="false">One row per finding</button>
     </div>
     <div class="tablewrap">
       <table class="fix">
@@ -333,6 +359,7 @@
         <tbody id="rows"><tr><td colspan="9" class="empty">Loading the run 2 findings…</td></tr></tbody>
       </table>
     </div>
+    <p class="low-note" id="low-note" hidden></p>
 
     <div class="detail" id="detail" hidden>
       <div class="detail-head">
@@ -396,7 +423,20 @@
   const ORDER = {High: 0, Medium: 1, Low: 2, 'Heads-Up': 3, 'No Change': 4};
   const STATUSES = ['Open', 'In progress', 'Fixed', 'Needs decision'];
   const COLOR = {High: 'var(--high)', Medium: 'var(--med)', Low: 'var(--low)'};
-  const DEFAULTS = {division: 'Colorado', community: 'All', prio: 'Open', state: 'todo', q: '', sel: null};
+  const DEFAULTS = {division: 'Colorado', community: 'All', view: 'division', ptype: 'All', prio: 'HM', group: true, state: 'todo', q: '', sel: null};
+  const PRIO_MATCH = {HM: ['High', 'Medium'], Open: OPEN};
+  // Page types arrive as text like "Neighborhood, Plan, Available Home"; split them so each finding counts under every page type it covers.
+  const PT_MAP = {'Incentive (livetru)': 'Incentive', 'all pages': 'Site-wide', 'All page types': 'Site-wide'};
+  const PT_ORDER = ['Community', 'Neighborhood', 'Plan', 'Available Home', 'Incentive', 'OptiMonk', 'Pre-Qualify / FAQ', 'Region hub', 'Site-wide', 'Tracker'];
+  const ptypesOf = (r) => r._pt || (r._pt = [...new Set(String(r.page_type || '').split(/\s*,\s*/).filter(Boolean).map((x) => PT_MAP[x] || x))]);
+  // Division items name the division in the owner field; everything else (Corporate Marketing, O'Neil template work) is corporate & vendor.
+  const audienceOf = (r) => {
+    if (r.priority === 'No Change') return 'both';
+    const o = String(r.owner || '').toLowerCase(), d = String(r.division || '').toLowerCase();
+    return d && o.includes(d) ? 'division' : 'corporate';
+  };
+  const inLens = (r) => (S.f.view === 'all' || audienceOf(r) === 'both' || audienceOf(r) === S.f.view) && (S.f.ptype === 'All' || ptypesOf(r).includes(S.f.ptype));
+  const openGroups = new Set();
   const S = {rows: [], cov: [], pages: [], prev: null, apiFailed: false, badPass: false, gotStatus: false, status: new Map(), f: {...DEFAULTS}, db: null, user: null, uid: null, canWrite: null, readOnly: false, pending: new Set(), names: {}};
   const $ = (id) => document.getElementById(id);
   const API = '/api/status';
@@ -415,7 +455,7 @@
 
   // ---------- status helpers ----------
   const actionable = (r) => r.priority !== 'No Change';
-  // Due dates, overdue and "Still failing" (marked fixed before this scan, yet the scan still found it) come from audit-core.js, shared with the deck.
+  // Due dates, overdue and "Still found after fix" (marked fixed before this scan, yet the scan still found it) come from audit-core.js, shared with the deck.
   let CORE = null;
   const core = () => (CORE || (CORE = AuditCore.make(S.rows, S.status, new Date())));
   const statusOf = (r) => core().statusOf(r);
@@ -423,12 +463,12 @@
   const model = () => AuditCore.model({rows: S.rows, cov: S.cov, pages: S.pages, status: S.status, prev: S.prev, names: S.names, division: S.f.division, community: S.f.community, today: new Date()});
 
   // ---------- filtering ----------
-  const inScope = (r) => (S.f.division === 'All' || r.division === S.f.division) && (S.f.community === 'All' || r.community === S.f.community);
+  const inScope = (r) => (S.f.division === 'All' || r.division === S.f.division) && (S.f.community === 'All' || r.community === S.f.community) && inLens(r);
   const inDivision = (r) => S.f.division === 'All' || r.division === S.f.division;
   function listRows() {
     const q = S.f.q.trim().toLowerCase();
     return S.rows.filter((r) => inScope(r)
-      && (S.f.prio === 'Open' ? OPEN.includes(r.priority) : r.priority === S.f.prio)
+      && (PRIO_MATCH[S.f.prio] ? PRIO_MATCH[S.f.prio].includes(r.priority) : r.priority === S.f.prio)
       && (r.priority === 'No Change' || S.f.state === 'all' || (S.f.state === 'Fixed' ? isFixed(r) : !isFixed(r)))
       && (!q || [r.id, r.community, r.check_label, r.finding, r.found, r.owner, r.page_type, (S.status.get(r.id) || {}).note || ''].join(' ').toLowerCase().includes(q)))
       .sort((a, b) => ORDER[a.priority] - ORDER[b.priority] || a.community.localeCompare(b.community) || a.check_id.localeCompare(b.check_id));
@@ -476,6 +516,12 @@
     cSel.replaceChildren(new Option('All communities', 'All'), ...comms.map((c) => new Option(c, c)));
     if (!comms.includes(S.f.community)) S.f.community = 'All';
     cSel.value = S.f.community;
+    $('f-view').value = S.f.view;
+    const pSel = $('f-ptype');
+    const pts = [...new Set(S.rows.filter(inDivision).flatMap(ptypesOf))].sort((a, b) => (PT_ORDER.indexOf(a) + 1 || 99) - (PT_ORDER.indexOf(b) + 1 || 99) || a.localeCompare(b));
+    pSel.replaceChildren(new Option('All page types', 'All'), ...pts.map((x) => new Option(x, x)));
+    if (!pts.includes(S.f.ptype)) S.f.ptype = 'All';
+    pSel.value = S.f.ptype;
     if (document.activeElement !== $('f-q')) $('f-q').value = S.f.q;
   }
 
@@ -534,7 +580,7 @@
   }
 
   function renderCharts() {
-    const div = S.rows.filter(inDivision);
+    const div = S.rows.filter((r) => inDivision(r) && inLens(r));
     const byComm = d3.group(div, (r) => r.community);
     const comm = [...byComm].map(([c, rs]) => {
       const left = (p) => rs.filter((r) => r.priority === p && !isFixed(r)).length;
@@ -566,6 +612,7 @@
   function renderList() {
     document.querySelectorAll('.chip[data-p]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.p === S.f.prio)));
     document.querySelectorAll('.chip[data-s]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.s === S.f.state)));
+    document.querySelectorAll('.chip[data-g]').forEach((c) => c.setAttribute('aria-pressed', String((c.dataset.g === '1') === S.f.group)));
     const rows = listRows();
     $('list-count').textContent = `${fmt(rows.length)} shown`;
     const tbody = $('rows');
@@ -579,7 +626,7 @@
     }
     const frag = document.createDocumentFragment();
     const canEdit = !!S.db && !S.readOnly && S.canWrite === true;
-    for (const r of rows) {
+    const rowEl = (r, child) => {
       const tr = document.createElement('tr');
       tr.dataset.id = r.id; tr.tabIndex = 0;
       tr.setAttribute('aria-selected', String(r.id === S.f.sel));
@@ -609,9 +656,61 @@
       const st = statusOf(r);
       if (st) { const s = document.createElement('span'); s.className = 'st'; s.dataset.st = st; s.textContent = st; sc.append(s); }
       const w = whoLine(r); if (w) sc.append(w);
+      if (child) tr.classList.add('child');
+      return tr;
+    };
+    // Group repeated items: the same check at the same priority across several communities or pages becomes one row.
+    const units = [];
+    if (S.f.group) {
+      const byKey = new Map();
+      for (const r of rows) { const k = r.check_id + '|' + r.priority; if (!byKey.has(k)) { byKey.set(k, []); units.push({key: k, rows: byKey.get(k)}); } byKey.get(k).push(r); }
+    } else for (const r of rows) units.push({key: r.id, rows: [r]});
+    for (const u of units) {
+      if (u.rows.length === 1) { frag.append(rowEl(u.rows[0], false)); continue; }
+      const rs = u.rows, first = rs[0];
+      const open = openGroups.has(u.key);
+      const tr = document.createElement('tr');
+      tr.className = 'grp'; tr.dataset.group = u.key; tr.tabIndex = 0; tr.setAttribute('aria-expanded', String(open));
+      const td = (cls, text) => { const c = document.createElement('td'); if (cls) c.className = cls; if (text != null) c.textContent = text; tr.append(c); return c; };
+      const dc = td('c-done');
+      const act = rs.filter(actionable);
+      if (act.length) {
+        const cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.dataset.group = u.key;
+        cb.checked = act.every(isFixed);
+        cb.indeterminate = !cb.checked && act.some(isFixed);
+        cb.disabled = !canEdit || act.some((r) => S.pending.has(r.id));
+        cb.setAttribute('aria-label', `Mark all ${act.length} ${first.check_label} items fixed`);
+        dc.append(cb);
+      }
+      const idc = td('c-id'); const car = document.createElement('span'); car.className = 'caret'; car.textContent = '▸'; idc.append(car, document.createTextNode(` ${rs.length} items`));
+      const pc = td(); const pill = document.createElement('span'); pill.className = 'pill'; pill.dataset.prio = first.priority; pill.textContent = first.priority; pc.append(pill);
+      const comms = [...new Set(rs.map((r) => r.community))];
+      td(null, comms.length === 1 ? comms[0] : `${comms.length} communities`);
+      td(null, first.check_label);
+      const fc = td('c-fix'); fc.textContent = `Same check across ${comms.length === 1 ? rs.length + ' pages or items' : comms.length + ' communities'}. Fix it in each place, or once in the template if it's shared.`;
+      const sub = document.createElement('span'); sub.className = 'grp-sub'; sub.textContent = 'Example: ' + String(first.finding || '').split(/(?<=[.!?])\s/)[0]; fc.append(sub);
+      td(null, AuditCore.owners(rs.map((r) => r.owner)));
+      const dues = act.filter((r) => !isFixed(r)).map((r) => core().dueOf(r)).filter(Boolean).sort((a, b) => a - b);
+      const dcell = td('due');
+      if (dues.length) {
+        dcell.textContent = AuditCore.fmtDay(dues[0]);
+        if (act.some((r) => core().isOverdue(r))) { dcell.classList.add('late'); const t = document.createElement('span'); t.className = 'late-tag'; t.textContent = 'Overdue'; dcell.append(t); }
+      }
+      const sc = td('c-status');
+      if (act.length) { const fx = act.filter(isFixed).length; const s2 = document.createElement('span'); s2.className = 'st'; s2.dataset.st = fx === act.length ? 'Fixed' : (fx ? 'In progress' : 'Open'); s2.textContent = `${fx} of ${act.length} fixed`; sc.append(s2); }
       frag.append(tr);
+      if (open) for (const r of rs) frag.append(rowEl(r, true));
     }
     tbody.append(frag);
+    // Low items are hidden by default so the list starts with what matters most.
+    const ln = $('low-note');
+    const lowLeft = S.f.prio === 'HM' ? S.rows.filter(inScope).filter((r) => r.priority === 'Low' && !isFixed(r)).length : 0;
+    ln.hidden = !lowLeft; ln.replaceChildren();
+    if (lowLeft) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.id = 'show-low'; b.textContent = 'Show Low items';
+      ln.append(document.createTextNode(`${fmt(lowLeft)} Low (polish) items aren't shown here.`), b);
+    }
     resolveNames();
   }
 
@@ -691,7 +790,7 @@
       scan.append(p);
     } else {
       const st = document.createElement('div'); st.className = 'stats';
-      for (const [v, l, warn] of [[m.diff.added, 'new'], [m.diff.resolved, 'cleared'], [m.diff.carried, 'carried over'], [m.diff.regressed, 'came back', true], [m.diff.stillFailing, 'marked fixed, still failing', true]]) {
+      for (const [v, l, warn] of [[m.diff.added, 'new'], [m.diff.resolved, 'cleared'], [m.diff.carried, 'carried over'], [m.diff.regressed, 'came back', true], [m.diff.stillFailing, 'marked fixed, still found', true]]) {
         const d = document.createElement('div'); d.className = 'stat' + (warn && v ? ' warn' : '');
         const b = document.createElement('b'); b.textContent = fmt(v); const sp = document.createElement('span'); sp.textContent = l; d.append(b, sp); st.append(d);
       }
@@ -802,16 +901,29 @@
   // ---------- events ----------
   $('f-division').addEventListener('change', (e) => { S.f.division = e.target.value; S.f.community = 'All'; S.f.sel = null; renderAll(); });
   $('f-community').addEventListener('change', (e) => { S.f.community = e.target.value; S.f.sel = null; renderAll(); });
+  $('f-view').addEventListener('change', (e) => { S.f.view = e.target.value; S.f.sel = null; renderAll(); });
+  $('f-ptype').addEventListener('change', (e) => { S.f.ptype = e.target.value; S.f.sel = null; renderAll(); });
+  document.querySelectorAll('.chip[data-g]').forEach((c) => c.addEventListener('click', () => { S.f.group = c.dataset.g === '1'; S.f.sel = null; renderList(); renderDetail(); }));
+  $('low-note').addEventListener('click', (e) => { if (e.target.closest('#show-low')) { S.f.prio = 'Low'; S.f.sel = null; renderAll(); } });
   let qTimer = null;
   $('f-q').addEventListener('input', (e) => { clearTimeout(qTimer); qTimer = setTimeout(() => { S.f.q = e.target.value; S.f.sel = null; renderList(); renderDetail(); }, 150); });
   $('f-reset').addEventListener('click', () => { S.f = {...DEFAULTS}; $('f-q').value = ''; renderAll(); });
   document.querySelectorAll('.tile').forEach((t) => t.addEventListener('click', () => {
-    S.f.prio = S.f.prio === t.dataset.prio ? 'Open' : t.dataset.prio; S.f.sel = null; renderAll();
+    S.f.prio = S.f.prio === t.dataset.prio ? DEFAULTS.prio : t.dataset.prio; S.f.sel = null; renderAll();
     $('fix-list').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
   }));
   document.querySelectorAll('.chip[data-p]').forEach((c) => c.addEventListener('click', () => { S.f.prio = c.dataset.p; S.f.sel = null; renderAll(); }));
   document.querySelectorAll('.chip[data-s]').forEach((c) => c.addEventListener('click', () => { S.f.state = c.dataset.s; S.f.sel = null; renderList(); renderDetail(); }));
   $('rows').addEventListener('change', async (e) => {
+    const gcb = e.target.closest('input[type=checkbox][data-group]');
+    if (gcb) {
+      const rs = listRows().filter((r) => r.check_id + '|' + r.priority === gcb.dataset.group && actionable(r));
+      const target = gcb.checked ? 'Fixed' : 'Open';
+      let n = 0;
+      for (const r of rs) { if ((statusOf(r) === 'Fixed') === gcb.checked) continue; if (await writeStatus(r.id, target, null)) n++; else break; }
+      if (n) toast(gcb.checked ? `${n} items marked fixed.` : `${n} items reopened.`);
+      return;
+    }
     const cb = e.target.closest('input[type=checkbox][data-id]');
     if (!cb) return;
     const id = cb.dataset.id;
@@ -820,6 +932,8 @@
   });
   $('rows').addEventListener('click', (e) => {
     if (e.target.closest('.c-done')) return;
+    const g = e.target.closest('tr[data-group]');
+    if (g) { const k = g.dataset.group; if (openGroups.has(k)) openGroups.delete(k); else openGroups.add(k); renderList(); return; }
     const tr = e.target.closest('tr[data-id]');
     if (!tr) return;
     S.f.sel = S.f.sel === tr.dataset.id ? null : tr.dataset.id;
@@ -827,6 +941,8 @@
     if (S.f.sel) $('detail').scrollIntoView({behavior: 'auto', block: 'nearest'});
   });
   $('rows').addEventListener('keydown', (e) => {
+    const g = e.target.closest('tr[data-group]');
+    if (g && !e.target.matches('input') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); const k = g.dataset.group; if (openGroups.has(k)) openGroups.delete(k); else openGroups.add(k); renderList(); return; }
     const tr = e.target.closest('tr[data-id]');
     if (!tr || e.target.matches('input')) return;
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); S.f.sel = tr.dataset.id; renderList(); renderDetail(); }

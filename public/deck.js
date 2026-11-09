@@ -75,7 +75,7 @@
     // 2. Scorecard
     {
       const sc = m.scorecard;
-      const s = slide('Division Scorecard', 'Open items by priority, as of today. Meets standard = share of checks that ran and found nothing to fix.');
+      const s = slide('Division Summary', 'Open items by priority, as of today. Meets standard = share of checks that ran and found nothing to fix.');
       const hdr = (t) => ({text: t, options: {bold: true, color: C.white, fill: {color: C.ink}, fontFace: H, fontSize: 11, align: 'center'}});
       const cell = (t, fill, color) => ({text: String(t), options: {fontFace: H, fontSize: 14, bold: true, align: 'center', fill: {color: fill || C.white}, color: color || C.text}});
       const trend = m.diff.baseline ? 'Baseline (first full run)' : `${m.diff.added} new · ${m.diff.resolved} cleared`;
@@ -112,11 +112,11 @@
           {text: 'No comparison yet.', options: {bold: true, breakLine: true}},
           {text: `The ${m.runDate} scan is the first full run against Criteria Library v2, so it is the baseline. From the next scan (planned ${m.nextRun}) this panel shows:`},
         ], {x: 0.95, y: 2.15, w: 5.2, h: 1.2, fontFace: B, fontSize: 11.5, color: C.text, margin: 0, valign: 'top', paraSpaceAfter: 4});
-        bullets(s, ['New: found for the first time', 'Cleared: no longer found', 'Carried over: still open from the last scan', 'Came back: met the standard last time, failing now', 'Still failing: marked fixed, but the scan still finds it'],
+        bullets(s, ['New: found for the first time', 'Cleared: no longer found', 'Carried over: still open from the last scan', 'Came back: met the standard last time, needs attention again', 'Still found after fix: marked fixed, but the scan still finds it'],
           {x: 0.95, y: 3.4, w: 5.2, h: 1.9, fontSize: 11});
       } else {
         const d = m.diff;
-        const rowsD = [['New', d.added], ['Cleared', d.resolved], ['Carried over', d.carried], ['Came back', d.regressed], ['Still failing (marked fixed, still found)', d.stillFailing]];
+        const rowsD = [['New', d.added], ['Cleared', d.resolved], ['Carried over', d.carried], ['Came back', d.regressed], ['Still found after fix', d.stillFailing]];
         s.addText(`Compared with the scan of ${d.prevDate}`, {x: 0.95, y: 2.1, w: 5.2, h: 0.3, fontFace: B, fontSize: 11, color: C.muted, margin: 0});
         rowsD.forEach(([l, v], i) => {
           const y = 2.55 + i * 0.52;
